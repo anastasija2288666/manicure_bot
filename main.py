@@ -9,6 +9,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database import init_db
 from handlers import router
+from admin import router as admin_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +31,7 @@ async def main():
     bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
+    dp.include_router(admin_router)
 
     log.info("Бот запускается...")
     try:

@@ -10,12 +10,14 @@ from aiogram.fsm.state import StatesGroup, State
 from config import ADMIN_ID
 from database import (
     add_booking,
+    add_or_update_user,
     cancel_booking,
     format_date,
     get_active_bookings_by_user,
     get_free_slots,
     get_service,
     get_services,
+    update_user_phone,
 )
 from keyboards import (
     get_cancel_keyboard,
@@ -41,6 +43,12 @@ class BookingStates(StatesGroup):
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
+    add_or_update_user(
+        user_id=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+    )
     await state.clear()
     await message.answer(
         "👋 Добро пожаловать в студию маникюра!\n\n"
@@ -190,6 +198,7 @@ async def process_name(message: Message, state: FSMContext):
 @router.message(BookingStates.phone, F.text)
 async def process_phone(message: Message, state: FSMContext):
     await state.update_data(client_phone=message.text.strip())
+    update_user_phone(message.from_user.id, message.text.strip())
     await state.set_state(BookingStates.confirm)
     data = await state.get_data()
     text = (
